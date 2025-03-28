@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>Perceptual Circle Scaling</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+<style>
+</style>
+
+</head>
+<body>
+    <div id='map'></div>
+    <h1>Map of Measles Cases by State, 2025</h1>
+
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+
+
+<script>
+console.log("hello world!");
+</script>
+
+
+
+<style>
+    body {
+      margin:0;
+      padding:0;
+      font-family:
+      sans-serif;
+      }
+  
+    h1 {
+      position: absolute;
+      left: 50px;
+      top: 10px;
+      padding: 8px 2%;
+      margin: 0;
+      background: whitesmoke;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      border-radius: 3px;
+      color: black;
+      font-size: 1.5em;
+      z-index: 800;
+      }
+  
+    #map {
+      position:absolute;
+      top:0;
+      bottom:0;
+      width:100%;
+      height: 100%;
+     }
+  
+  
+  </style>
+  
+  
+  
+  
+  <script>
+  
+      var map = L.map('map', {
+          center: [39.5, -95.3],
+          zoom: 4
+      });
+  
+      var CartoDB_Positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 20
+})
+.addTo(map);
+
+states = L.geoJson.ajax("assets/data.geojson",{
+    attribution: 'Data: <a href="https://www.cdc.gov/measles/data-research/" target="blank">CDC</a>, Map: Charlie Odom',
+    pointToLayer: function (feature, x){
+      return L.circleMarker(x, {
+        color: 'green',
+        opacity: 1,
+        weight: 2,
+        fillColor: 'green',
+        fillOpacity: .4,
+        radius: calcRadius(feature.properties.cases_calendar_year)
+      }).on({
+              mouseover: function(e){
+                this.setStyle({color: 'blue',fillColor: 'blue'});
+                                    },
+              mouseout: function(e){
+                this.setStyle({color:'green', fillColor: 'green'});
+                } })},});
+	
+var minValue = 1;
+var minRadius = 8;
+
+function calcRadius(val) {
+        return 1.00 * Math.pow(val/minValue,.4) * minRadius;
+        }
+
+L.control.scale({position: 'bottomleft'}).addTo(map);
+
+states.addTo(map);
+  
+
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+  var div = L.DomUtil.create('div', 'legend');
+  var grades = [10, 150, 200];
+  var labels = [];
+  var minValue = 1;
+  var minRadius = 8;
+
+  div.innerHTML += '<h4 style="margin: 0.5; color: #4B657C; font-size: 1.8em; border-radius: 5px;">Measles Cases</h4>';
+
+  grades.forEach(function (grade) {
+    var radius = Math.pow(grade / minValue, 0.9) * minRadius;
+    labels.push(
+      `<div style="display: flex; align-items: center; margin: 10px 0; text-align: left;">
+        <i style="width:${radius * 0.099}px; height:${radius * 0.099}px; opacity: 0.4; background: green; border: 2px green; border-radius: 50%; display: inline-block; margin-right: 15px; position: relative; bottom: 4px;"></i>
+        <span style="font-size: 1.5em; color: green;">${grade}</span>
+      </div>`
+    );
+  });
+
+  div.innerHTML += labels.join('');
+  div.style.backgroundColor = '#f5f5f5'; 
+  div.style.color = '#4B657C';  
+  div.style.padding = '15px';  
+  div.style.border = '2px solid #4B657C';  
+  div.style.boxShadow = '2px 2px 8px rgba(0, 0, 0, 0.3)';  
+  div.style.borderRadius = '10px';  
+  div.style.fontSize = '1.2em';  
+
+  return div;
+};
+
+legend.addTo(map);
+
+
+
+  
+  </script>
+
+
+</body>
+
+
+
+</html>
